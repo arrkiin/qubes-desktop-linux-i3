@@ -1,16 +1,25 @@
-diff -uNr i3-4.12/include/atoms_rest.xmacro i3-4.12p/include/atoms_rest.xmacro
---- i3-4.12/include/atoms_rest.xmacro	2016-11-26 03:00:35.566619804 -0800
-+++ i3-4.12p/include/atoms_rest.xmacro	2016-11-26 01:06:49.885619804 -0800
-@@ -17,3 +17,5 @@
+commit 445027f49f4ee46ce3c6c6fd83a264aaddf9cc59
+Author: arrkiin <arrkiin@gmail.com>
+Date:   Thu Dec 14 16:45:08 2017 +0100
+
+    Merge qubes patch into i3-gaps
+
+diff --git a/include/atoms_rest.xmacro b/include/atoms_rest.xmacro
+index d461dc08..67cfb4a4 100644
+--- a/include/atoms_rest.xmacro
++++ b/include/atoms_rest.xmacro
+@@ -17,3 +17,5 @@ xmacro(I3_FLOATING_WINDOW)
  xmacro(_NET_REQUEST_FRAME_EXTENTS)
  xmacro(_NET_FRAME_EXTENTS)
  xmacro(_MOTIF_WM_HINTS)
 +xmacro(_QUBES_VMNAME)
 +xmacro(_QUBES_LABEL)
-diff -uNr i3-4.12/include/config_directives.h i3-4.12p/include/config_directives.h
---- i3-4.12/include/config_directives.h	2016-11-26 03:00:35.566619804 -0800
-+++ i3-4.12p/include/config_directives.h	2016-11-26 02:00:38.564619804 -0800
-@@ -59,7 +59,7 @@
+\ No newline at end of file
+diff --git a/include/config_directives.h b/include/config_directives.h
+index fb320694..824b6f42 100644
+--- a/include/config_directives.h
++++ b/include/config_directives.h
+@@ -67,7 +67,7 @@ CFGFUN(no_focus);
  CFGFUN(ipc_socket, const char *path);
  CFGFUN(restart_state, const char *path);
  CFGFUN(popup_during_fullscreen, const char *value);
@@ -19,10 +28,11 @@ diff -uNr i3-4.12/include/config_directives.h i3-4.12p/include/config_directives
  CFGFUN(color_single, const char *colorclass, const char *color);
  CFGFUN(floating_modifier, const char *modifiers);
  CFGFUN(new_window, const char *windowtype, const char *border, const long width);
-diff -uNr i3-4.12/include/config.h i3-4.12p/include/config.h
---- i3-4.12/include/config.h	2016-11-26 03:00:35.566619804 -0800
-+++ i3-4.12p/include/config.h	2016-11-26 01:24:18.515619804 -0800
-@@ -209,7 +209,7 @@
+diff --git a/include/configuration.h b/include/configuration.h
+index eecac80a..303d2e1e 100644
+--- a/include/configuration.h
++++ b/include/configuration.h
+@@ -225,7 +225,7 @@ struct Config {
          struct Colortriple unfocused;
          struct Colortriple urgent;
          struct Colortriple placeholder;
@@ -31,10 +41,11 @@ diff -uNr i3-4.12/include/config.h i3-4.12p/include/config.h
      struct config_bar {
          struct Colortriple focused;
          struct Colortriple unfocused;
-diff -uNr i3-4.12/include/data.h i3-4.12p/include/data.h
---- i3-4.12/include/data.h	2016-11-26 03:00:35.566619804 -0800
-+++ i3-4.12p/include/data.h	2016-11-26 01:24:57.578619804 -0800
-@@ -126,6 +126,23 @@
+diff --git a/include/data.h b/include/data.h
+index 4b03ecd1..989724ed 100644
+--- a/include/data.h
++++ b/include/data.h
+@@ -139,6 +139,23 @@ typedef enum {
      POINTER_WARPING_NONE = 1
  } warping_t;
  
@@ -55,10 +66,10 @@ diff -uNr i3-4.12/include/data.h i3-4.12p/include/data.h
 +
 +#define QUBE_NUM_LABELS 9
 +
- /**
-  * Stores a rectangle, for example the size of a window, the child window etc.
-  * It needs to be packed so that the compiler will not add any padding bytes.
-@@ -377,6 +394,12 @@
+ struct gaps_t {
+     int inner;
+     int outer;
+@@ -438,6 +455,12 @@ struct Window {
      /** The name of the window. */
      i3String *name;
  
@@ -71,13 +82,15 @@ diff -uNr i3-4.12/include/data.h i3-4.12p/include/data.h
      /** The WM_WINDOW_ROLE of this window (for example, the pidgin buddy window
       * sets "buddy list"). Useful to match specific windows in assignments or
       * for_window. */
-diff -uNr i3-4.12/include/window.h i3-4.12p/include/window.h
---- i3-4.12/include/window.h	2016-11-26 03:00:35.565619804 -0800
-+++ i3-4.12p/include/window.h	2016-11-26 01:06:49.886619804 -0800
-@@ -39,6 +39,20 @@
+diff --git a/include/window.h b/include/window.h
+index 77e3f48f..5d6ce716 100644
+--- a/include/window.h
++++ b/include/window.h
+@@ -40,6 +40,20 @@ void window_update_name(i3Window *win, xcb_get_property_reply_t *prop, bool befo
+  */
  void window_update_name_legacy(i3Window *win, xcb_get_property_reply_t *prop, bool before_mgmt);
  
- /**
++/**
 + * Updates the qubes vmname by using _QUBES_VMNAME (encoded in UTF-8) for the given
 + * window.
 + *
@@ -91,14 +104,14 @@ diff -uNr i3-4.12/include/window.h i3-4.12p/include/window.h
 + */
 +void window_update_qubes_label(i3Window *win, xcb_get_property_reply_t *prop, bool before_mgmt);
 +
-+/**
+ /**
   * Updates the CLIENT_LEADER (logical parent window).
   *
-  */
-diff -uNr i3-4.12/parser-specs/config.spec i3-4.12p/parser-specs/config.spec
---- i3-4.12/parser-specs/config.spec	2016-11-26 03:00:35.564619804 -0800
-+++ i3-4.12p/parser-specs/config.spec	2016-11-26 01:27:56.615619804 -0800
-@@ -49,7 +49,7 @@
+diff --git a/parser-specs/config.spec b/parser-specs/config.spec
+index a10b20b3..11cd0bf4 100644
+--- a/parser-specs/config.spec
++++ b/parser-specs/config.spec
+@@ -56,7 +56,7 @@ state INITIAL:
    colorclass = 'client.background'
        -> COLOR_SINGLE
    colorclass = 'client.focused_inactive', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
@@ -107,7 +120,7 @@ diff -uNr i3-4.12/parser-specs/config.spec i3-4.12p/parser-specs/config.spec
  
  # We ignore comments and 'set' lines (variables).
  state IGNORE_LINE:
-@@ -268,6 +268,10 @@
+@@ -324,6 +324,10 @@ state COLOR_SINGLE:
        -> call cfg_color_single($colorclass, $color)
  
  # colorclass border background text indicator
@@ -118,7 +131,7 @@ diff -uNr i3-4.12/parser-specs/config.spec i3-4.12p/parser-specs/config.spec
  state COLOR_BORDER:
    border = word
        -> COLOR_BACKGROUND
-@@ -284,13 +288,13 @@
+@@ -340,13 +344,13 @@ state COLOR_INDICATOR:
    indicator = word
        -> COLOR_CHILD_BORDER
    end
@@ -135,10 +148,11 @@ diff -uNr i3-4.12/parser-specs/config.spec i3-4.12p/parser-specs/config.spec
  
  # <exec|exec_always> [--no-startup-id] command
  state EXEC:
-diff -uNr i3-4.12/src/commands.c i3-4.12p/src/commands.c
---- i3-4.12/src/commands.c	2016-11-26 03:00:35.569619804 -0800
-+++ i3-4.12p/src/commands.c	2016-11-26 01:06:49.886619804 -0800
-@@ -730,22 +730,16 @@
+diff --git a/src/commands.c b/src/commands.c
+index 00296d97..d16953a0 100644
+--- a/src/commands.c
++++ b/src/commands.c
+@@ -728,22 +728,16 @@ void cmd_border(I3_CMD, const char *border_style_str, long border_width) {
          if (strcmp(border_style_str, "toggle") == 0) {
              border_style++;
              border_style %= 3;
@@ -165,10 +179,11 @@ diff -uNr i3-4.12/src/commands.c i3-4.12p/src/commands.c
              } else {
                  ELOG("BUG: called with border_style=%s\n", border_style_str);
                  ysuccess(false);
-diff -uNr i3-4.12/src/config.c i3-4.12p/src/config.c
---- i3-4.12/src/config.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/config.c	2016-11-26 02:38:51.693619804 -0800
-@@ -207,14 +207,100 @@
+diff --git a/src/config.c b/src/config.c
+index 38f35d95..3fb7f9b3 100644
+--- a/src/config.c
++++ b/src/config.c
+@@ -200,14 +200,99 @@ void load_configuration(xcb_connection_t *conn, const char *override_configpath,
          x.child_border = draw_util_hex_to_color(cbackground);  \
      } while (0)
  
@@ -271,11 +286,10 @@ diff -uNr i3-4.12/src/config.c i3-4.12p/src/config.c
 -    INIT_COLOR(config.client.placeholder, "#000000", "#0c0c0c", "#ffffff", "#000000");
 +    INIT_COLOR(config.client[QUBE_DOM0].placeholder,
 +        "#000000", "#0c0c0c", "#ffffff", "#000000");
-+ 
  
      /* the last argument (indicator color) is ignored for bar colors */
      INIT_COLOR(config.bar.focused, "#4c7899", "#285577", "#ffffff", "#000000");
-@@ -236,6 +322,12 @@
+@@ -234,6 +319,12 @@ void load_configuration(xcb_connection_t *conn, const char *override_configpath,
  
      parse_configuration(override_configpath, true);
  
@@ -288,17 +302,17 @@ diff -uNr i3-4.12/src/config.c i3-4.12p/src/config.c
      if (reload) {
          translate_keysyms();
          grab_all_keys(conn);
-diff -uNr i3-4.12/src/config_directives.c i3-4.12p/src/config_directives.c
---- i3-4.12/src/config_directives.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/config_directives.c	2016-11-26 02:01:51.409619804 -0800
-@@ -335,32 +335,63 @@
+diff --git a/src/config_directives.c b/src/config_directives.c
+index 97aa6573..195f5e2d 100644
+--- a/src/config_directives.c
++++ b/src/config_directives.c
+@@ -423,32 +423,63 @@ CFGFUN(popup_during_fullscreen, const char *value) {
  
  CFGFUN(color_single, const char *colorclass, const char *color) {
      /* used for client.background only currently */
 -    config.client.background = draw_util_hex_to_color(color);
-+    config.client[QUBE_DOM0].background = draw_util_hex_to_color(color);
- }
- 
+-}
+-
 -CFGFUN(color, const char *colorclass, const char *border, const char *background, const char *text, const char *indicator, const char *child_border) {
 -#define APPLY_COLORS(classname)                                                              \
 -    do {                                                                                     \
@@ -315,6 +329,9 @@ diff -uNr i3-4.12/src/config_directives.c i3-4.12p/src/config_directives.c
 -                config.client.classname.child_border = config.client.classname.background;   \
 -            }                                                                                \
 -        }                                                                                    \
++    config.client[QUBE_DOM0].background = draw_util_hex_to_color(color);
++}
++
 +CFGFUN(color, const char *colorclass, const char *qubelabel, const char *border, const char *background, const char *text, const char *indicator, const char *child_border) {
 +#define APPLY_COLORS(classname, label)                        \
 +    do {                                                      \
@@ -373,14 +390,15 @@ diff -uNr i3-4.12/src/config_directives.c i3-4.12p/src/config_directives.c
 +        APPLY_COLORS(focused, label);
 +        APPLY_COLORS(unfocused, label);
 +        APPLY_COLORS(urgent, label);
-+    }   
++    } 
  
  #undef APPLY_COLORS
  }
-diff -uNr i3-4.12/src/manage.c i3-4.12p/src/manage.c
---- i3-4.12/src/manage.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/manage.c	2016-11-26 01:06:49.886619804 -0800
-@@ -87,7 +87,7 @@
+diff --git a/src/manage.c b/src/manage.c
+index af7308e7..e297d985 100644
+--- a/src/manage.c
++++ b/src/manage.c
+@@ -86,7 +86,7 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
      xcb_get_window_attributes_reply_t *attr = NULL;
  
      xcb_get_property_cookie_t wm_type_cookie, strut_cookie, state_cookie,
@@ -389,7 +407,7 @@ diff -uNr i3-4.12/src/manage.c i3-4.12p/src/manage.c
          class_cookie, leader_cookie, transient_cookie,
          role_cookie, startup_id_cookie, wm_hints_cookie,
          wm_normal_hints_cookie, motif_wm_hints_cookie, wm_user_time_cookie, wm_desktop_cookie;
-@@ -152,6 +152,8 @@
+@@ -151,6 +151,8 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
      strut_cookie = GET_PROPERTY(A__NET_WM_STRUT_PARTIAL, UINT32_MAX);
      state_cookie = GET_PROPERTY(A__NET_WM_STATE, UINT32_MAX);
      utf8_title_cookie = GET_PROPERTY(A__NET_WM_NAME, 128);
@@ -398,7 +416,7 @@ diff -uNr i3-4.12/src/manage.c i3-4.12p/src/manage.c
      leader_cookie = GET_PROPERTY(A_WM_CLIENT_LEADER, UINT32_MAX);
      transient_cookie = GET_PROPERTY(XCB_ATOM_WM_TRANSIENT_FOR, UINT32_MAX);
      title_cookie = GET_PROPERTY(XCB_ATOM_WM_NAME, 128);
-@@ -176,6 +178,8 @@
+@@ -177,6 +179,8 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
      window_update_class(cwindow, xcb_get_property_reply(conn, class_cookie, NULL), true);
      window_update_name_legacy(cwindow, xcb_get_property_reply(conn, title_cookie, NULL), true);
      window_update_name(cwindow, xcb_get_property_reply(conn, utf8_title_cookie, NULL), true);
@@ -407,10 +425,11 @@ diff -uNr i3-4.12/src/manage.c i3-4.12p/src/manage.c
      window_update_leader(cwindow, xcb_get_property_reply(conn, leader_cookie, NULL));
      window_update_transient_for(cwindow, xcb_get_property_reply(conn, transient_cookie, NULL));
      window_update_strut_partial(cwindow, xcb_get_property_reply(conn, strut_cookie, NULL));
-diff -uNr i3-4.12/src/resize.c i3-4.12p/src/resize.c
---- i3-4.12/src/resize.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/resize.c	2016-11-26 01:50:43.025619804 -0800
-@@ -144,7 +144,7 @@
+diff --git a/src/resize.c b/src/resize.c
+index f07fcec6..ef4fe9b7 100644
+--- a/src/resize.c
++++ b/src/resize.c
+@@ -142,7 +142,7 @@ int resize_graphical_handler(Con *first, Con *second, orientation_t orientation,
      }
  
      mask = XCB_CW_BACK_PIXEL;
@@ -419,29 +438,22 @@ diff -uNr i3-4.12/src/resize.c i3-4.12p/src/resize.c
  
      mask |= XCB_CW_OVERRIDE_REDIRECT;
      values[1] = 1;
-diff -uNr i3-4.12/src/restore_layout.c i3-4.12p/src/restore_layout.c
---- i3-4.12/src/restore_layout.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/restore_layout.c	2016-11-26 01:52:32.450619804 -0800
-@@ -140,7 +140,7 @@
+diff --git a/src/restore_layout.c b/src/restore_layout.c
+index b99a50c1..d7686a86 100644
+--- a/src/restore_layout.c
++++ b/src/restore_layout.c
+@@ -129,8 +129,8 @@ void restore_connect(void) {
+ }
  
  static void update_placeholder_contents(placeholder_state *state) {
-     xcb_change_gc(restore_conn, state->gc, XCB_GC_FOREGROUND,
--                  (uint32_t[]){config.client.placeholder.background.colorpixel});
-+                  (uint32_t[]){config.client[QUBE_DOM0].placeholder.background.colorpixel});
-     xcb_poly_fill_rectangle(restore_conn, state->pixmap, state->gc, 1,
-                             (xcb_rectangle_t[]){{0, 0, state->rect.width, state->rect.height}});
+-    const color_t foreground = config.client.placeholder.text;
+-    const color_t background = config.client.placeholder.background;
++    const color_t foreground = config.client[QUBE_DOM0].placeholder.text;
++    const color_t background = config.client[QUBE_DOM0].placeholder.background;
  
-@@ -148,7 +148,8 @@
-     xcb_flush(restore_conn);
-     xcb_aux_sync(restore_conn);
+     draw_util_clear_surface(&(state->surface), background);
  
--    set_font_colors(state->gc, config.client.placeholder.text, config.client.placeholder.background);
-+    set_font_colors(state->gc, config.client[QUBE_DOM0].placeholder.text, 
-+                    config.client[QUBE_DOM0].placeholder.background);
- 
-     Match *swallows;
-     int n = 0;
-@@ -208,7 +209,7 @@
+@@ -199,7 +199,7 @@ static void open_placeholder_window(Con *con) {
              true,
              XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
              (uint32_t[]){
@@ -450,13 +462,15 @@ diff -uNr i3-4.12/src/restore_layout.c i3-4.12p/src/restore_layout.c
                  XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY,
              });
          /* Make i3 not focus this window. */
-diff -uNr i3-4.12/src/window.c i3-4.12p/src/window.c
---- i3-4.12/src/window.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/window.c	2016-11-26 01:06:49.887619804 -0800
-@@ -148,6 +148,57 @@
+diff --git a/src/window.c b/src/window.c
+index 68c6933a..ddc177fa 100644
+--- a/src/window.c
++++ b/src/window.c
+@@ -145,6 +145,57 @@ void window_update_name_legacy(i3Window *win, xcb_get_property_reply_t *prop, bo
+     free(prop);
  }
  
- /*
++ /*
 + * Updates the qubes vmname by using _QUBES_VMNAME (encoded in UTF-8) for the given
 + * window.
 + *
@@ -507,14 +521,14 @@ diff -uNr i3-4.12/src/window.c i3-4.12p/src/window.c
 +    free(prop);
 +}
 +
-+/*
+ /*
   * Updates the CLIENT_LEADER (logical parent window).
   *
-  */
-diff -uNr i3-4.12/src/x.c i3-4.12p/src/x.c
---- i3-4.12/src/x.c	2016-11-26 03:00:35.568619804 -0800
-+++ i3-4.12p/src/x.c	2016-11-26 01:45:34.352619804 -0800
-@@ -384,15 +384,25 @@
+diff --git a/src/x.c b/src/x.c
+index 7829079b..a9c0169c 100644
+--- a/src/x.c
++++ b/src/x.c
+@@ -409,15 +409,25 @@ void x_draw_decoration(Con *con) {
      /* 1: build deco_params and compare with cache */
      struct deco_render_params *p = scalloc(1, sizeof(struct deco_render_params));
  
@@ -544,7 +558,7 @@ diff -uNr i3-4.12/src/x.c i3-4.12p/src/x.c
  
      p->border_style = con_border_style(con);
  
-@@ -401,7 +411,7 @@
+@@ -426,7 +436,7 @@ void x_draw_decoration(Con *con) {
      p->con_rect = (struct width_height){r->width, r->height};
      p->con_window_rect = (struct width_height){w->width, w->height};
      p->con_deco_rect = con->deco_rect;
@@ -553,28 +567,28 @@ diff -uNr i3-4.12/src/x.c i3-4.12p/src/x.c
      p->con_is_leaf = con_is_leaf(con);
      p->parent_layout = con->parent->layout;
  
-@@ -433,16 +443,16 @@
+@@ -458,16 +468,16 @@ void x_draw_decoration(Con *con) {
      /* 2: draw the client.background, but only for the parts around the window_rect */
      if (con->window != NULL) {
          /* top area */
--        draw_util_rectangle(conn, &(con->frame_buffer), config.client.background,
-+        draw_util_rectangle(conn, &(con->frame_buffer), config.client[QUBE_DOM0].background,
+-        draw_util_rectangle(&(con->frame_buffer), config.client.background,
++        draw_util_rectangle(&(con->frame_buffer), config.client[QUBE_DOM0].background,
                              0, 0, r->width, w->y);
          /* bottom area */
--        draw_util_rectangle(conn, &(con->frame_buffer), config.client.background,
-+        draw_util_rectangle(conn, &(con->frame_buffer), config.client[QUBE_DOM0].background,
+-        draw_util_rectangle(&(con->frame_buffer), config.client.background,
++        draw_util_rectangle(&(con->frame_buffer), config.client[QUBE_DOM0].background,
                              0, w->y + w->height, r->width, r->height - (w->y + w->height));
          /* left area */
--        draw_util_rectangle(conn, &(con->frame_buffer), config.client.background,
-+        draw_util_rectangle(conn, &(con->frame_buffer), config.client[QUBE_DOM0].background,
+-        draw_util_rectangle(&(con->frame_buffer), config.client.background,
++        draw_util_rectangle(&(con->frame_buffer), config.client[QUBE_DOM0].background,
                              0, 0, w->x, r->height);
          /* right area */
--        draw_util_rectangle(conn, &(con->frame_buffer), config.client.background,
-+        draw_util_rectangle(conn, &(con->frame_buffer), config.client[QUBE_DOM0].background,
+-        draw_util_rectangle(&(con->frame_buffer), config.client.background,
++        draw_util_rectangle(&(con->frame_buffer), config.client[QUBE_DOM0].background,
                              w->x + w->width, 0, r->width - (w->x + w->width), r->height);
      }
  
-@@ -527,7 +537,6 @@
+@@ -547,7 +557,6 @@ void x_draw_decoration(Con *con) {
      /* 6: draw the title */
      int text_offset_y = (con->deco_rect.height - config.font.height) / 2;
  
@@ -582,12 +596,16 @@ diff -uNr i3-4.12/src/x.c i3-4.12p/src/x.c
      if (win == NULL) {
          i3String *title;
          if (con->title_format == NULL) {
-@@ -603,13 +612,19 @@
+@@ -604,20 +613,24 @@ void x_draw_decoration(Con *con) {
          FREE(formatted_mark);
      }
  
 +    /* set window title, include qubes vmname */
      i3String *title = con->title_format == NULL ? win->name : con_parse_title_format(con);
+     if (title == NULL) {
+         goto copy_pixmaps;
+     }
+ 
 +    char *title_buf;
 +    sasprintf(&title_buf, "[%s] %s", i3string_as_utf8(win->qubes_vmname), i3string_as_utf8(title));
 +    if (con->title_format != NULL)
@@ -596,10 +614,13 @@ diff -uNr i3-4.12/src/x.c i3-4.12p/src/x.c
 +    FREE(title_buf);
      draw_util_text(title, &(parent->frame_buffer),
                     p->color->text, p->color->background,
-                    con->deco_rect.x + logical_px(2) + indent_px, con->deco_rect.y + text_offset_y,
-                    con->deco_rect.width - logical_px(2) - indent_px - mark_width - logical_px(2));
--    if (con->title_format != NULL)
+                    con->deco_rect.x + logical_px(2),
+                    con->deco_rect.y + text_offset_y,
+                    con->deco_rect.width - mark_width - 2 * logical_px(2));
+-
+-    if (con->title_format != NULL) {
 -        I3STRING_FREE(title);
+-    }
 +    I3STRING_FREE(title);
  
  after_title:
